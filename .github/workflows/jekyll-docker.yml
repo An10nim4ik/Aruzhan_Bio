@@ -1,0 +1,32 @@
+name: Jekyll site CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      # Use a specific version of Docker to ensure compatibility
+      - name: Set up Docker
+        uses: actions/setup-docker@v2
+        with:
+          docker-version: '20.10.10'  # Specify a Docker version that works with Jekyll builder
+
+      # Build the site using the jekyll/builder container
+      - name: Build the site
+        run: |
+          docker run \
+            --volume "${{ github.workspace }}:/srv/jekyll" \
+            --volume "${{ github.workspace }}/_site:/srv/jekyll/_site" \
+            jekyll/builder:latest \
+            /bin/bash -c "chmod -R 777 /srv/jekyll && bundle install && jekyll build --future"
